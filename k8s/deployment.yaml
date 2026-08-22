@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: honeyroot-deployment
+  labels:
+    app: honeyroot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: honeyroot
+  template:
+    metadata:
+      labels:
+        app: honeyroot
+    spec:
+      containers:
+      - name: honeyroot
+        image: yourdockerhub/honeyroot-x:latest
+        ports:
+        - containerPort: 2222
+        env:
+        - name: VT_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: honeyroot-secrets
+              key: vt_api_key
+        volumeMounts:
+        - name: honeyroot-logs
+          mountPath: /opt/honeyroot/logs
+      volumes:
+      - name: honeyroot-logs
+        emptyDir: {}
