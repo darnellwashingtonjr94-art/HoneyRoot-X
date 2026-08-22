@@ -8,6 +8,8 @@ services:
     container_name: honeyroot-x
     restart: unless-stopped
     ports:
-      - "22:2222" # Binds the host's standard SSH port to the honeypot
+      - "22:2222"
+    environment:
+      - VT_API_KEY=your_virustotal_api_key_here
     volumes:
       - ./logs:/opt/honeyroot/logs
