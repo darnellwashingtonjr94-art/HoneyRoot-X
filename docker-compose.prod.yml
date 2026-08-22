@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  honeyroot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: honeyroot-prod
+    restart: always
+    ports:
+      - "22:2222"
+    environment:
+      - VT_API_KEY=${VT_API_KEY}
+    volumes:
+      - ./logs:/opt/honeyroot/logs
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+
+  alerter:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.alerter
+    container_name: honeyroot-alerter
+    restart: always
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+    volumes:
+      - ./logs:/opt/honeyroot/logs
