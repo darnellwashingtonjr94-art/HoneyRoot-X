@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  honeyroot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: honeyroot-x
+    restart: unless-stopped
+    ports:
+      - "22:2222" # Binds the host's standard SSH port to the honeypot
+    volumes:
+      - ./logs:/opt/honeyroot/logs
