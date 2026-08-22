@@ -1,0 +1,4 @@
+FROM python:3.11-slim
+WORKDIR /opt/honeyroot
+COPY alerting/discord_alert.py .
+CMD ["python", "-u", "discord_alert.py"]
