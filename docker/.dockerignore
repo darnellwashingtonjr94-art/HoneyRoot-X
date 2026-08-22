@@ -1,0 +1,14 @@
+.git
+.github
+tests/
+scripts/
+terraform/
+k8s/
+elk/
+logs/
+venv/
+.env
+__pycache__/
+*.pyc
+*.md
+Makefile
