@@ -1,12 +1,42 @@
 import time
 import os
+import json
 import urllib.request
 import hashlib
 from urllib.parse import urlparse
+from urllib.error import HTTPError
 from logger import log_event
 
 PAYLOAD_DIR = "/opt/honeyroot/logs/payloads"
 os.makedirs(PAYLOAD_DIR, exist_ok=True)
+
+# Pull the API key from the environment
+VT_API_KEY = os.environ.get("VT_API_KEY", "")
+
+def check_virustotal(sha256_hash):
+    """Queries VirusTotal for an existing hash analysis."""
+    if not VT_API_KEY:
+        return {"status": "skipped", "reason": "No API key configured"}
+
+    url = f"https://www.virustotal.com/api/v3/files/{sha256_hash}"
+    req = urllib.request.Request(url, headers={'x-apikey': VT_API_KEY})
+    
+    try:
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read())
+            stats = data.get('data', {}).get('attributes', {}).get('last_analysis_stats', {})
+            return {
+                "status": "found",
+                "malicious": stats.get("malicious", 0),
+                "undetected": stats.get("undetected", 0),
+                "total_engines": sum(stats.values())
+            }
+    except HTTPError as e:
+        if e.code == 404:
+            return {"status": "not_found", "message": "Hash not previously seen by VirusTotal"}
+        return {"status": "error", "message": f"HTTP {e.code}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 class VirtualFileSystem:
     def __init__(self):
@@ -65,13 +95,11 @@ def handle_shell(channel, attacker_ip):
                     
                     # --- WGET & CURL INTERCEPTION ---
                     if cmd in ("wget", "curl") and len(parts) > 1:
-                        # Find the first string that looks like a URL
                         url = next((p for p in parts if p.startswith("http://") or p.startswith("https://")), None)
                         
                         if url:
                             channel.send(f"Connecting to {url}...\r\n".encode('utf-8'))
                             
-                            # Download the payload on the backend
                             filename, file_hash, size = download_and_store_payload(url)
                             
                             if filename and size > 0:
@@ -82,15 +110,19 @@ def handle_shell(channel, attacker_ip):
                                     "size_bytes": size
                                 })
                                 
-                                # Fake a successful download output
-                                channel.send(f"HTTP request sent, awaiting response... 200 OK\r\n".encode('utf-8'))
-                                channel.send(f"Length: {size} ({size/1024:.1f}K) [application/octet-stream]\r\n".format(size).encode('utf-8'))
+                                vt_report = check_virustotal(file_hash)
+                                log_event("virustotal_scan", {
+                                    "sha256": file_hash,
+                                    "report": vt_report
+                                })
+                                
+                                channel.send(b"HTTP request sent, awaiting response... 200 OK\r\n")
+                                channel.send(f"Length: {size} ({size/1024:.1f}K) [application/octet-stream]\r\n".encode('utf-8'))
                                 channel.send(f"Saving to: '{filename}'\r\n\r\n".encode('utf-8'))
                                 
-                                # Register it in the fake file system so 'ls' shows it
                                 vfs.files[vfs.resolve_path(filename)] = f"[Binary Data: {file_hash}]"
                             else:
-                                channel.send(f"Resolving host... failed: Connection timed out.\r\nwget: unable to resolve host address\r\n".encode('utf-8'))
+                                channel.send(b"Resolving host... failed: Connection timed out.\r\nwget: unable to resolve host address\r\n")
                         else:
                             channel.send(f"{cmd}: missing URL\r\n".encode('utf-8'))
 
@@ -126,34 +158,3 @@ def handle_shell(channel, attacker_ip):
             break
             
     channel.close()
-
-import json
-from urllib.error import HTTPError
-
-# Pull the API key from the environment
-VT_API_KEY = os.environ.get("VT_API_KEY", "")
-
-def check_virustotal(sha256_hash):
-    """Queries VirusTotal for an existing hash analysis."""
-    if not VT_API_KEY:
-        return {"status": "skipped", "reason": "No API key configured"}
-
-    url = f"https://www.virustotal.com/api/v3/files/{sha256_hash}"
-    req = urllib.request.Request(url, headers={'x-apikey': VT_API_KEY})
-    
-    try:
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read())
-            stats = data.get('data', {}).get('attributes', {}).get('last_analysis_stats', {})
-            return {
-                "status": "found",
-                "malicious": stats.get("malicious", 0),
-                "undetected": stats.get("undetected", 0),
-                "total_engines": sum(stats.values())
-            }
-    except HTTPError as e:
-        if e.code == 404:
-            return {"status": "not_found", "message": "Hash not previously seen by VirusTotal"}
-        return {"status": "error", "message": f"HTTP {e.code}"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
