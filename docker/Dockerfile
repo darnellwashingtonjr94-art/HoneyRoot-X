@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-# Install necessary crypto dependencies for Paramiko
+# Install necessary crypto dependencies for Paramiko and OpenSSH client for key generation
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libssl-dev libffi-dev && \
+    apt-get install -y --no-install-recommends gcc libssl-dev libffi-dev openssh-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for the container process
