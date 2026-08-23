@@ -49,6 +49,36 @@
 
 HoneyRoot-X is a containerized SSH honeypot designed to bait attackers seeking root access, capture their brute-force credentials, and log their post-exploitation commands within an isolated fake bash shell.
 
+## 🍯 What is HoneyRoot-X?
+
+Imagine building a fake house with an unlocked door just to watch how burglars try to sneak in. **HoneyRoot-X** is a digital version of that fake house! In the cybersecurity world, this is called a **honeypot**. It is a trap designed specifically to trick hackers, scammers, and malicious robots on the internet.
+
+---
+
+## 🛡️ What It Does & The Problems It Solves
+
+Instead of letting hackers attack your real computers, you put this trap out on the internet for them to find.
+
+*   **🎭 Plays Pretend:** It creates a fake system that looks exactly like a vulnerable computer. When hackers log in, it logs every single command they type.
+*   **🗡️ Confiscates Weapons:** If a hacker tries to download a virus into the trap, HoneyRoot-X intercepts the download, saves the virus safely, and checks it against a giant virus database (VirusTotal) to see what it is.
+*   **🚨 Sounds the Alarm:** The second someone falls for the trap, it sends an immediate alert right to your Discord app.
+
+---
+
+## 🧊 Why is This So Cool?
+
+It actively fights back by wasting the bad guys' time! It has a built-in feature called a "tar-pit" that intentionally slows down the hacker's connection, making them frustrated while you safely study their tricks. On top of that, it is built using top-tier professional tools—like **Docker**, **Kubernetes**, and **Terraform**—meaning cybersecurity experts can launch these traps into the cloud with just a few clicks.
+
+---
+
+## 🚀 How to Set It Up
+
+Because it uses a tool called Docker (which safely runs programs in their own locked containers), setting it up is like building a simple Lego set:
+
+1.  **🗺️ Get the Blueprint:** First, you download the project folder (the repository) to your computer.
+2.  **👷 Get Your Builder:** Make sure you have Docker installed on your computer.
+3.  **🔌 Turn it On:** You open your computer's terminal, go to the folder, and type a magic command: `docker-compose up -d`. Docker reads the instructions and builds the trap for you automatically!
+
 ## Setup & Deployment
 
 1. **Clone the repository:**
