@@ -1,4 +1,5 @@
-# HoneyRoot-X
+IMG_1402.jpeg
+## HoneyRoot-X
 
 HoneyRoot-X is a containerized SSH honeypot designed to bait attackers seeking root access, capture their brute-force credentials, and log their post-exploitation commands within an isolated fake bash shell.
 
