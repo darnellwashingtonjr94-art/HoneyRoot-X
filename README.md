@@ -1,4 +1,7 @@
-IMG_1402.jpeg
+<p align="center">
+  <img src="IMG_1402.jpeg" alt="HoneyRoot-X Logo" width="600">
+</p>
+
 ## HoneyRoot-X
 
 HoneyRoot-X is a containerized SSH honeypot designed to bait attackers seeking root access, capture their brute-force credentials, and log their post-exploitation commands within an isolated fake bash shell.
